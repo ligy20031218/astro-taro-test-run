@@ -169,11 +169,78 @@ export default function HomePage() {
 
   return (
     <div style={styles.container}>
-      <header style={styles.header}>
-        <h1 style={styles.title}>🔮 TAROT & ASTROLOGY 🔮</h1>
-        <p style={{ color: '#F4E4BC', fontSize: '1.1rem', fontFamily: 'var(--font-inter), sans-serif' }}>
-          Discover your cosmic destiny through the ancient wisdom of the stars and tarot
-        </p>
+      {/* Decorative Header with Celestial Elements */}
+      <header style={{ position: 'relative', textAlign: 'center', padding: '4rem 1rem', marginBottom: '2rem' }}>
+        <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          {/* Central Sunburst */}
+          <div style={{
+            width: '8rem',
+            height: '8rem',
+            border: '2px solid rgba(212, 175, 55, 0.3)',
+            borderRadius: '50%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}>
+            <div style={{
+              width: '6rem',
+              height: '6rem',
+              border: '1px solid rgba(212, 175, 55, 0.5)',
+              borderRadius: '50%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
+              <div style={{
+                width: '4rem',
+                height: '4rem',
+                backgroundColor: 'rgba(212, 175, 55, 0.2)',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
+                <div style={{
+                  width: '2rem',
+                  height: '2rem',
+                  backgroundColor: 'rgba(212, 175, 55, 0.4)',
+                  borderRadius: '50%'
+                }}></div>
+              </div>
+            </div>
+          </div>
+          {/* Radiating lines */}
+          <div style={{ position: 'absolute', inset: 0 }}>
+            {[...Array(8)].map((_, i) => (
+              <div
+                key={i}
+                style={{
+                  position: 'absolute',
+                  width: '1px',
+                  height: '4rem',
+                  backgroundColor: 'rgba(212, 175, 55, 0.2)',
+                  transformOrigin: 'bottom',
+                  transform: `rotate(${i * 45}deg) translateY(-50px)`,
+                  left: '50%',
+                  top: '50%'
+                }}
+              />
+            ))}
+          </div>
+        </div>
+        
+        <div style={{ position: 'relative', zIndex: 10 }}>
+          <h1 style={styles.title}>TAROT & ASTROLOGY</h1>
+          <div style={{
+            width: '8rem',
+            height: '1px',
+            backgroundColor: '#D4AF37',
+            margin: '0 auto 1rem'
+          }}></div>
+          <p style={{ color: '#F4E4BC', fontSize: '1.1rem', fontFamily: 'var(--font-inter), sans-serif' }}>
+            Discover your cosmic destiny through the ancient wisdom of the stars and tarot
+          </p>
+        </div>
       </header>
 
       <main>
@@ -234,28 +301,113 @@ export default function HomePage() {
 
         <div style={styles.grid}>
           <div style={styles.card}>
-            <h2 style={{ marginBottom: '1rem', fontSize: '1.5rem', fontFamily: 'var(--font-playfair), serif' }}>Zodiac Sign</h2>
-            {zodiac ? (
-              <div style={styles.result}>
-                <p style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '0.5rem', fontFamily: 'var(--font-playfair), serif' }}>
-                  {zodiac}
+            <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
+              {/* Decorative Circle Icon */}
+              <div style={{
+                width: '4rem',
+                height: '4rem',
+                border: '2px solid rgba(212, 175, 55, 0.4)',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '0 auto 1rem'
+              }}>
+                <div style={{
+                  width: '2rem',
+                  height: '2rem',
+                  border: '1px solid rgba(212, 175, 55, 0.6)',
+                  borderRadius: '50%'
+                }}></div>
+              </div>
+              <h2 style={{ marginBottom: '0.5rem', fontSize: '1.5rem', fontFamily: 'var(--font-playfair), serif' }}>ZODIAC INSIGHTS</h2>
+              <div style={{
+                width: '3rem',
+                height: '1px',
+                backgroundColor: '#D4AF37',
+                margin: '0 auto'
+              }}></div>
+            </div>
+            <div style={{ textAlign: 'center', marginBottom: '1rem' }}>
+              {zodiac ? (
+                <p style={{
+                  color: '#F4E4BC',
+                  fontSize: '1.125rem',
+                  fontFamily: 'var(--font-inter), sans-serif'
+                }}>
+                  <span style={{ fontFamily: 'var(--font-playfair), serif', color: '#D4AF37', fontSize: '1.25rem' }}>
+                    {zodiac}
+                  </span>
                 </p>
+              ) : (
+                <p style={{ color: '#F4E4BC', fontFamily: 'var(--font-inter), sans-serif' }}>
+                  Enter your date of birth to reveal your sign
+                </p>
+              )}
+            </div>
+            
+            {zodiac && (
+              <div style={styles.result}>
                 {fortune && (
-                  <div style={{ marginTop: '1rem', color: '#F4E4BC' }}>
-                    <h3 style={{ marginBottom: '0.5rem', textTransform: 'capitalize' }}>
+                  <div style={{ paddingTop: '1.5rem', borderTop: '1px solid rgba(212, 175, 55, 0.2)' }}>
+                    <h3 style={{
+                      fontFamily: 'var(--font-playfair), serif',
+                      color: '#D4AF37',
+                      fontSize: '1.125rem',
+                      marginBottom: '0.75rem',
+                      textTransform: 'capitalize'
+                    }}>
                       {horizon} Horoscope
                     </h3>
-                    <p>{fortune}</p>
+                    <p style={{
+                      color: '#F4E4BC',
+                      fontFamily: 'var(--font-inter), sans-serif',
+                      lineHeight: '1.75'
+                    }}>{fortune}</p>
                   </div>
                 )}
               </div>
-            ) : (
-              <p style={{ color: '#F4E4BC' }}>Enter your date of birth to reveal your sign</p>
             )}
           </div>
 
           <div style={styles.card}>
-            <h2 style={{ marginBottom: '1rem', fontSize: '1.5rem', fontFamily: 'var(--font-playfair), serif' }}>Tarot Reading</h2>
+            <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
+              {/* Decorative Circle Icon */}
+              <div style={{
+                width: '4rem',
+                height: '4rem',
+                border: '2px solid rgba(212, 175, 55, 0.4)',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '0 auto 1rem'
+              }}>
+                <div style={{
+                  width: '2rem',
+                  height: '2rem',
+                  border: '1px solid rgba(212, 175, 55, 0.6)',
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  <div style={{
+                    width: '1rem',
+                    height: '1rem',
+                    backgroundColor: 'rgba(212, 175, 55, 0.4)',
+                    borderRadius: '50%'
+                  }}></div>
+                </div>
+              </div>
+              <h2 style={{ marginBottom: '0.5rem', fontSize: '1.5rem', fontFamily: 'var(--font-playfair), serif' }}>TAROT READING</h2>
+              <div style={{
+                width: '3rem',
+                height: '1px',
+                backgroundColor: '#D4AF37',
+                margin: '0 auto'
+              }}></div>
+            </div>
             {tarot ? (
               <div>
                 <p style={{ marginBottom: '1rem', color: '#F4E4BC', fontStyle: 'italic' }}>
@@ -280,14 +432,47 @@ export default function HomePage() {
         {/* Advanced Features Section */}
         {showAdvanced && (
           <div style={{ marginTop: '3rem' }}>
-            <h2 style={{ textAlign: 'center', fontSize: '2rem', marginBottom: '2rem', color: '#D4AF37', fontFamily: 'var(--font-playfair), serif' }}>
-              ⭐ ADVANCED COSMIC INSIGHTS ⭐
-            </h2>
+            <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+              <h2 style={{ fontSize: '2rem', marginBottom: '0.5rem', color: '#D4AF37', fontFamily: 'var(--font-playfair), serif' }}>
+                ADVANCED COSMIC INSIGHTS
+              </h2>
+              <div style={{
+                width: '8rem',
+                height: '1px',
+                backgroundColor: '#D4AF37',
+                margin: '0 auto'
+              }}></div>
+            </div>
             
             <div style={styles.grid}>
               {/* Detailed Horoscope */}
               <div style={styles.card}>
-                <h3 style={{ marginBottom: '1rem', fontSize: '1.5rem', textAlign: 'center', fontFamily: 'var(--font-playfair), serif' }}>DETAILED HOROSCOPE</h3>
+                <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
+                  <div style={{
+                    width: '3rem',
+                    height: '3rem',
+                    border: '2px solid rgba(212, 175, 55, 0.4)',
+                    borderRadius: '50%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    margin: '0 auto 0.75rem'
+                  }}>
+                    <div style={{
+                      width: '1.5rem',
+                      height: '1.5rem',
+                      border: '1px solid rgba(212, 175, 55, 0.6)',
+                      borderRadius: '50%'
+                    }}></div>
+                  </div>
+                  <h3 style={{ marginBottom: '0.5rem', fontSize: '1.5rem', textAlign: 'center', fontFamily: 'var(--font-playfair), serif' }}>DETAILED HOROSCOPE</h3>
+                  <div style={{
+                    width: '3rem',
+                    height: '1px',
+                    backgroundColor: '#D4AF37',
+                    margin: '0 auto'
+                  }}></div>
+                </div>
                 
                 {zodiac && (
                   <div style={{ textAlign: 'center', marginBottom: '1rem', padding: '0.5rem', background: 'rgba(212, 175, 55, 0.1)', borderRadius: '0.5rem' }}>
@@ -387,7 +572,42 @@ export default function HomePage() {
 
               {/* Advanced Tarot */}
               <div style={styles.card}>
-                <h3 style={{ marginBottom: '1rem', fontSize: '1.5rem', textAlign: 'center', fontFamily: 'var(--font-playfair), serif' }}>ADVANCED TAROT</h3>
+                <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
+                  <div style={{
+                    width: '3rem',
+                    height: '3rem',
+                    border: '2px solid rgba(212, 175, 55, 0.4)',
+                    borderRadius: '50%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    margin: '0 auto 0.75rem'
+                  }}>
+                    <div style={{
+                      width: '1.5rem',
+                      height: '1.5rem',
+                      border: '1px solid rgba(212, 175, 55, 0.6)',
+                      borderRadius: '50%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}>
+                      <div style={{
+                        width: '0.75rem',
+                        height: '0.75rem',
+                        backgroundColor: 'rgba(212, 175, 55, 0.4)',
+                        borderRadius: '50%'
+                      }}></div>
+                    </div>
+                  </div>
+                  <h3 style={{ marginBottom: '0.5rem', fontSize: '1.5rem', textAlign: 'center', fontFamily: 'var(--font-playfair), serif' }}>ADVANCED TAROT</h3>
+                  <div style={{
+                    width: '3rem',
+                    height: '1px',
+                    backgroundColor: '#D4AF37',
+                    margin: '0 auto'
+                  }}></div>
+                </div>
                 
                 <div style={{ marginBottom: '1rem' }}>
                   <label style={{ display: 'block', marginBottom: '0.5rem', color: '#F4E4BC', fontSize: '0.875rem' }}>
