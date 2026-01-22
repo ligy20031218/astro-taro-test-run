@@ -27,6 +27,7 @@ export default function HomePage() {
   const [tarotQuestion, setTarotQuestion] = useState<string>("");
   const [detailedHoroscopeScope, setDetailedHoroscopeScope] = useState<'daily'|'weekly'|'monthly'|'yearly'>('weekly');
   const [lang, setLang] = useState<SupportedLang>('en');
+  const [showLangMenu, setShowLangMenu] = useState(false);
   const [horoscopeLoading, setHoroscopeLoading] = useState(false);
   const [tarotLoading, setTarotLoading] = useState(false);
   const userIdRef = useRef<string>('user-' + Date.now());
@@ -124,6 +125,21 @@ export default function HomePage() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lang]);
+
+  // Close language menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (showLangMenu && !target.closest('[data-lang-menu]')) {
+        setShowLangMenu(false);
+      }
+    };
+
+    if (showLangMenu) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [showLangMenu]);
 
   const styles = {
     container: {
@@ -251,6 +267,86 @@ export default function HomePage() {
         </div>
         
         <div style={{ position: 'relative', zIndex: 10 }}>
+          {/* Language Selector Button */}
+          <div style={{ position: 'absolute', top: '0', right: '0', zIndex: 20 }} data-lang-menu>
+            <button
+              onClick={() => setShowLangMenu(!showLangMenu)}
+              data-lang-menu
+              style={{
+                backgroundColor: 'rgba(212, 175, 55, 0.2)',
+                border: '1px solid rgba(212, 175, 55, 0.4)',
+                borderRadius: '0.5rem',
+                padding: '0.5rem 1rem',
+                color: '#D4AF37',
+                fontSize: '0.875rem',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                fontFamily: 'var(--font-inter), sans-serif'
+              }}
+            >
+              <span>🌐</span>
+              <span>{SUPPORTED_LANGUAGES.find(l => l.code === lang)?.name || 'English'}</span>
+              <span>{showLangMenu ? '▲' : '▼'}</span>
+            </button>
+            
+            {/* Language Menu Dropdown */}
+            {showLangMenu && (
+              <div data-lang-menu style={{
+                position: 'absolute',
+                top: '100%',
+                right: 0,
+                marginTop: '0.5rem',
+                backgroundColor: 'rgba(11, 20, 38, 0.95)',
+                border: '1px solid rgba(212, 175, 55, 0.4)',
+                borderRadius: '0.5rem',
+                padding: '0.5rem',
+                minWidth: '200px',
+                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.5)',
+                zIndex: 30
+              }}>
+                {SUPPORTED_LANGUAGES.map(language => (
+                  <button
+                    key={language.code}
+                    onClick={() => {
+                      setLang(language.code);
+                      setShowLangMenu(false);
+                    }}
+                    style={{
+                      width: '100%',
+                      padding: '0.75rem 1rem',
+                      backgroundColor: lang === language.code 
+                        ? 'rgba(212, 175, 55, 0.3)' 
+                        : 'transparent',
+                      border: 'none',
+                      borderRadius: '0.25rem',
+                      color: lang === language.code ? '#D4AF37' : '#F4E4BC',
+                      fontSize: '0.875rem',
+                      cursor: 'pointer',
+                      textAlign: 'left',
+                      fontFamily: 'var(--font-inter), sans-serif',
+                      marginBottom: '0.25rem',
+                      transition: 'all 0.2s ease'
+                    }}
+                    onMouseEnter={(e) => {
+                      if (lang !== language.code) {
+                        e.currentTarget.style.backgroundColor = 'rgba(212, 175, 55, 0.1)';
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (lang !== language.code) {
+                        e.currentTarget.style.backgroundColor = 'transparent';
+                      }
+                    }}
+                  >
+                    {language.name}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+          
           <h1 style={styles.title}>TAROT & ASTROLOGY</h1>
           <div style={{
             width: '8rem',
@@ -296,20 +392,6 @@ export default function HomePage() {
               </select>
             </div>
             
-            <div>
-              <label style={{ display: 'block', marginBottom: '0.5rem', color: '#F4E4BC' }}>
-                Language
-              </label>
-              <select
-                value={lang}
-                onChange={(e) => setLang(e.target.value as SupportedLang)}
-                style={styles.input}
-              >
-                {SUPPORTED_LANGUAGES.map(l => (
-                  <option key={l.code} value={l.code}>{l.name}</option>
-                ))}
-              </select>
-            </div>
           </div>
 
           <div>
