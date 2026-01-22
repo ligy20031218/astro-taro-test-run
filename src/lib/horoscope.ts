@@ -1,4 +1,5 @@
 import type { ZodiacSign } from "./zodiac";
+import { translateText, type SupportedLang } from "./i18n";
 
 type Horizon = "daily" | "monthly" | "yearly";
 
@@ -65,7 +66,8 @@ const horoscopes: Record<ZodiacSign, Record<Horizon, string>> = {
   }
 };
 
-export async function getHoroscope(sign: ZodiacSign, horizon: Horizon): Promise<string> {
-  return horoscopes[sign][horizon];
+export async function getHoroscope(sign: ZodiacSign, horizon: Horizon, lang: SupportedLang = 'en'): Promise<string> {
+  const text = horoscopes[sign][horizon];
+  return translateText(text, lang);
 }
 

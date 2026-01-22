@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { getZodiacFromDate, type ZodiacSign } from "@/lib/zodiac";
 import { getHoroscope } from "@/lib/horoscope";
 import { drawTarot } from "@/lib/tarot";
 import { TAROT_SPREADS } from "@/lib/advanced-tarot";
+import { SUPPORTED_LANGUAGES, type SupportedLang } from "@/lib/i18n";
 import type { HoroscopeUnit, TarotSession } from "@/lib/types";
 import TarotCardComponent from "@/components/TarotCard";
 
@@ -25,6 +26,7 @@ export default function HomePage() {
   const [selectedSpread, setSelectedSpread] = useState<string>("3-card");
   const [tarotQuestion, setTarotQuestion] = useState<string>("");
   const [detailedHoroscopeScope, setDetailedHoroscopeScope] = useState<'daily'|'weekly'|'monthly'|'yearly'>('weekly');
+  const [lang, setLang] = useState<SupportedLang>('en');
   const [horoscopeLoading, setHoroscopeLoading] = useState(false);
   const [tarotLoading, setTarotLoading] = useState(false);
   const userIdRef = useRef<string>('user-' + Date.now());
@@ -37,7 +39,7 @@ export default function HomePage() {
     try {
       const sign = getZodiacFromDate(new Date(dob));
       setZodiac(sign);
-      const h = await getHoroscope(sign as ZodiacSign, horizon);
+      const h = await getHoroscope(sign as ZodiacSign, horizon, lang);
       setFortune(h);
     } catch (error) {
       console.error("Error getting horoscope:", error);
@@ -63,7 +65,7 @@ export default function HomePage() {
           sign: currentZodiac,
           scope: detailedHoroscopeScope,
           startDate,
-          lang: 'en'
+          lang
         })
       });
       const data = await response.json();
@@ -90,7 +92,7 @@ export default function HomePage() {
           spreadName: selectedSpread,
           userId: userIdRef.current,
           question: tarotQuestion,
-          lang: 'en'
+          lang
         })
       });
       const data = await response.json();
@@ -103,6 +105,25 @@ export default function HomePage() {
       setTarotLoading(false);
     }
   }
+
+  // Auto-refresh current readings when language changes
+  useEffect(() => {
+    // Refresh basic horoscope if zodiac is set
+    if (zodiac && validDob && !loading) {
+      getHoroscope(zodiac as ZodiacSign, horizon, lang).then(setFortune);
+    }
+
+    const shouldRefreshHoroscope = !!detailedHoroscope && validDob && !horoscopeLoading;
+    if (shouldRefreshHoroscope) {
+      handleDetailedHoroscope();
+    }
+
+    const shouldRefreshTarot = !!advancedTarot && !tarotLoading;
+    if (shouldRefreshTarot) {
+      handleAdvancedTarot();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lang]);
 
   const styles = {
     container: {
@@ -272,6 +293,21 @@ export default function HomePage() {
                 <option value="daily">Daily</option>
                 <option value="monthly">Monthly</option>
                 <option value="yearly">Yearly</option>
+              </select>
+            </div>
+            
+            <div>
+              <label style={{ display: 'block', marginBottom: '0.5rem', color: '#F4E4BC' }}>
+                Language
+              </label>
+              <select
+                value={lang}
+                onChange={(e) => setLang(e.target.value as SupportedLang)}
+                style={styles.input}
+              >
+                {SUPPORTED_LANGUAGES.map(l => (
+                  <option key={l.code} value={l.code}>{l.name}</option>
+                ))}
               </select>
             </div>
           </div>
