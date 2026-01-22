@@ -6,6 +6,7 @@ import { getHoroscope } from "@/lib/horoscope";
 import { drawTarot } from "@/lib/tarot";
 import { TAROT_SPREADS } from "@/lib/advanced-tarot";
 import { SUPPORTED_LANGUAGES, type SupportedLang } from "@/lib/i18n";
+import { getTranslation } from "@/lib/translations";
 import type { HoroscopeUnit, TarotSession } from "@/lib/types";
 import TarotCardComponent from "@/components/TarotCard";
 
@@ -347,7 +348,7 @@ export default function HomePage() {
             )}
           </div>
           
-          <h1 style={styles.title}>TAROT & ASTROLOGY</h1>
+          <h1 style={styles.title}>{getTranslation('title', lang)}</h1>
           <div style={{
             width: '8rem',
             height: '1px',
@@ -355,19 +356,19 @@ export default function HomePage() {
             margin: '0 auto 1rem'
           }}></div>
           <p style={{ color: '#F4E4BC', fontSize: '1.1rem', fontFamily: 'var(--font-inter), sans-serif' }}>
-            Discover your cosmic destiny through the ancient wisdom of the stars and tarot
+            {getTranslation('subtitle', lang)}
           </p>
         </div>
       </header>
 
       <main>
         <div style={styles.card}>
-          <h2 style={{ marginBottom: '1rem', fontSize: '1.5rem', fontFamily: 'var(--font-playfair), serif' }}>Enter Your Information</h2>
+          <h2 style={{ marginBottom: '1rem', fontSize: '1.5rem', fontFamily: 'var(--font-playfair), serif' }}>{getTranslation('enterInformation', lang)}</h2>
           
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '1rem' }}>
             <div>
               <label style={{ display: 'block', marginBottom: '0.5rem', color: '#F4E4BC' }}>
-                Date of Birth
+                {getTranslation('dateOfBirth', lang)}
               </label>
               <input
                 type="date"
@@ -403,16 +404,16 @@ export default function HomePage() {
                 opacity: (!validDob || loading) ? 0.4 : 1
               }}
             >
-              {loading ? "Consulting Stars..." : "Get Horoscope"}
+              {loading ? getTranslation('consultingStars', lang) : getTranslation('getHoroscope', lang)}
             </button>
             <button onClick={handleTarot} style={styles.button}>
-              Draw Tarot Cards
+              {getTranslation('drawTarot', lang)}
             </button>
             <button 
               onClick={() => setShowAdvanced(!showAdvanced)} 
               style={{...styles.button, backgroundColor: showAdvanced ? 'rgba(212, 175, 55, 0.3)' : 'rgba(212, 175, 55, 0.1)'}}
             >
-              {showAdvanced ? "Hide Advanced" : "Show Advanced Features"}
+              {showAdvanced ? getTranslation('hideAdvanced', lang) : getTranslation('showAdvanced', lang)}
             </button>
           </div>
         </div>
@@ -438,7 +439,7 @@ export default function HomePage() {
                   borderRadius: '50%'
                 }}></div>
               </div>
-              <h2 style={{ marginBottom: '0.5rem', fontSize: '1.5rem', fontFamily: 'var(--font-playfair), serif' }}>ZODIAC INSIGHTS</h2>
+              <h2 style={{ marginBottom: '0.5rem', fontSize: '1.5rem', fontFamily: 'var(--font-playfair), serif' }}>{getTranslation('zodiacInsights', lang)}</h2>
               <div style={{
                 width: '3rem',
                 height: '1px',
@@ -459,7 +460,7 @@ export default function HomePage() {
                 </p>
               ) : (
                 <p style={{ color: '#F4E4BC', fontFamily: 'var(--font-inter), sans-serif' }}>
-                  Enter your date of birth to reveal your sign
+                  {getTranslation('enterDobToReveal', lang)}
                 </p>
               )}
             </div>
@@ -475,7 +476,7 @@ export default function HomePage() {
                       marginBottom: '0.75rem',
                       textTransform: 'capitalize'
                     }}>
-                      {horizon} Horoscope
+                      {getTranslation(horizon, lang)} {getTranslation('horoscope', lang)}
                     </h3>
                     <p style={{
                       color: '#F4E4BC',
@@ -518,7 +519,7 @@ export default function HomePage() {
                   }}></div>
                 </div>
               </div>
-              <h2 style={{ marginBottom: '0.5rem', fontSize: '1.5rem', fontFamily: 'var(--font-playfair), serif' }}>TAROT READING</h2>
+              <h2 style={{ marginBottom: '0.5rem', fontSize: '1.5rem', fontFamily: 'var(--font-playfair), serif' }}>{getTranslation('tarotReading', lang)}</h2>
               <div style={{
                 width: '3rem',
                 height: '1px',
@@ -534,15 +535,15 @@ export default function HomePage() {
                 {tarot.cards.map((card, index) => (
                   <div key={card.id} style={{ marginBottom: '1rem', paddingLeft: '1rem', borderLeft: '2px solid rgba(212, 175, 55, 0.3)' }}>
                     <p style={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>
-                      {index === 0 ? "PAST" : index === 1 ? "PRESENT" : "FUTURE"}: {card.name}
-                      {card.reversed && <span style={{ fontSize: '0.875rem', opacity: 0.7 }}> (reversed)</span>}
+                      {index === 0 ? getTranslation('past', lang) : index === 1 ? getTranslation('present', lang) : getTranslation('future', lang)}: {card.name}
+                      {card.reversed && <span style={{ fontSize: '0.875rem', opacity: 0.7 }}> {getTranslation('reversed', lang)}</span>}
                     </p>
                     <p style={{ color: '#F4E4BC', fontSize: '0.9rem' }}>{card.meaning}</p>
                   </div>
                 ))}
               </div>
             ) : (
-              <p style={{ color: '#F4E4BC' }}>Click &quot;Draw Tarot Cards&quot; for a reading</p>
+              <p style={{ color: '#F4E4BC' }}>{getTranslation('clickDrawTarot', lang)}</p>
             )}
           </div>
         </div>
@@ -552,7 +553,7 @@ export default function HomePage() {
           <div style={{ marginTop: '3rem' }}>
             <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
               <h2 style={{ fontSize: '2rem', marginBottom: '0.5rem', color: '#D4AF37', fontFamily: 'var(--font-playfair), serif' }}>
-                ADVANCED COSMIC INSIGHTS
+                {getTranslation('advancedCosmicInsights', lang)}
               </h2>
               <div style={{
                 width: '8rem',
@@ -583,7 +584,7 @@ export default function HomePage() {
                       borderRadius: '50%'
                     }}></div>
                   </div>
-                  <h3 style={{ marginBottom: '0.5rem', fontSize: '1.5rem', textAlign: 'center', fontFamily: 'var(--font-playfair), serif' }}>DETAILED HOROSCOPE</h3>
+                  <h3 style={{ marginBottom: '0.5rem', fontSize: '1.5rem', textAlign: 'center', fontFamily: 'var(--font-playfair), serif' }}>{getTranslation('detailedHoroscope', lang)}</h3>
                   <div style={{
                     width: '3rem',
                     height: '1px',
@@ -602,17 +603,17 @@ export default function HomePage() {
                 {validDob && (
                   <div style={{ marginBottom: '1rem' }}>
                     <label style={{ display: 'block', marginBottom: '0.5rem', color: '#F4E4BC', fontSize: '0.875rem' }}>
-                      Time Period:
+                      {getTranslation('selectTimePeriod', lang)}:
                     </label>
                     <select
                       value={detailedHoroscopeScope}
                       onChange={(e) => setDetailedHoroscopeScope(e.target.value as any)}
                       style={styles.input}
                     >
-                      <option value="daily">Daily</option>
-                      <option value="weekly">Weekly</option>
-                      <option value="monthly">Monthly</option>
-                      <option value="yearly">Yearly</option>
+                      <option value="daily">{getTranslation('daily', lang)}</option>
+                      <option value="weekly">{getTranslation('weekly', lang)}</option>
+                      <option value="monthly">{getTranslation('monthly', lang)}</option>
+                      <option value="yearly">{getTranslation('yearly', lang)}</option>
                     </select>
                   </div>
                 )}
@@ -626,7 +627,7 @@ export default function HomePage() {
                     opacity: (!validDob || horoscopeLoading) ? 0.4 : 1
                   }}
                 >
-                  {horoscopeLoading ? "GENERATING..." : "GET DETAILED READING"}
+                  {horoscopeLoading ? getTranslation('generating', lang) : getTranslation('getDetailedReading', lang)}
                 </button>
 
                 {detailedHoroscope && (
@@ -637,31 +638,31 @@ export default function HomePage() {
                         <div style={{ fontSize: '1.5rem', color: '#D4AF37', fontWeight: 'bold' }}>
                           {detailedHoroscope.scores.love}
                         </div>
-                        <div style={{ fontSize: '0.875rem', color: '#F4E4BC' }}>Love</div>
+                        <div style={{ fontSize: '0.875rem', color: '#F4E4BC' }}>{getTranslation('love', lang)}</div>
                       </div>
                       <div style={{ textAlign: 'center' }}>
                         <div style={{ fontSize: '1.5rem', color: '#D4AF37', fontWeight: 'bold' }}>
                           {detailedHoroscope.scores.career}
                         </div>
-                        <div style={{ fontSize: '0.875rem', color: '#F4E4BC' }}>Career</div>
+                        <div style={{ fontSize: '0.875rem', color: '#F4E4BC' }}>{getTranslation('career', lang)}</div>
                       </div>
                       <div style={{ textAlign: 'center' }}>
                         <div style={{ fontSize: '1.5rem', color: '#D4AF37', fontWeight: 'bold' }}>
                           {detailedHoroscope.scores.wealth}
                         </div>
-                        <div style={{ fontSize: '0.875rem', color: '#F4E4BC' }}>Wealth</div>
+                        <div style={{ fontSize: '0.875rem', color: '#F4E4BC' }}>{getTranslation('wealth', lang)}</div>
                       </div>
                       <div style={{ textAlign: 'center' }}>
                         <div style={{ fontSize: '1.5rem', color: '#D4AF37', fontWeight: 'bold' }}>
                           {detailedHoroscope.scores.health}
                         </div>
-                        <div style={{ fontSize: '0.875rem', color: '#F4E4BC' }}>Health</div>
+                        <div style={{ fontSize: '0.875rem', color: '#F4E4BC' }}>{getTranslation('health', lang)}</div>
                       </div>
                     </div>
 
                     {detailedHoroscope.summary && (
                       <div style={{ marginBottom: '1rem', padding: '1rem', background: 'rgba(212, 175, 55, 0.1)', borderRadius: '0.5rem' }}>
-                        <h4 style={{ color: '#D4AF37', marginBottom: '0.5rem' }}>Summary</h4>
+                        <h4 style={{ color: '#D4AF37', marginBottom: '0.5rem' }}>{getTranslation('summary', lang)}</h4>
                         <p style={{ color: '#F4E4BC', fontSize: '0.875rem', lineHeight: '1.6' }}>
                           {detailedHoroscope.summary}
                         </p>
@@ -670,7 +671,7 @@ export default function HomePage() {
 
                     {detailedHoroscope.suggestions && detailedHoroscope.suggestions.length > 0 && (
                       <div style={{ marginBottom: '1rem' }}>
-                        <h4 style={{ color: '#D4AF37', marginBottom: '0.5rem' }}>Suggestions</h4>
+                        <h4 style={{ color: '#D4AF37', marginBottom: '0.5rem' }}>{getTranslation('suggestions', lang)}</h4>
                         <ul style={{ color: '#F4E4BC', fontSize: '0.875rem', paddingLeft: '1.5rem' }}>
                           {detailedHoroscope.suggestions.map((s, i) => (
                             <li key={i} style={{ marginBottom: '0.25rem' }}>{s}</li>
@@ -680,9 +681,9 @@ export default function HomePage() {
                     )}
 
                     <div style={{ fontSize: '0.875rem', color: '#F4E4BC' }}>
-                      <p><strong>Lucky Color:</strong> {detailedHoroscope.lucky.color}</p>
-                      <p><strong>Lucky Number:</strong> {detailedHoroscope.lucky.number}</p>
-                      <p><strong>Key Dates:</strong> {detailedHoroscope.keyDates.join(', ')}</p>
+                      <p><strong>{getTranslation('luckyColor', lang)}</strong> {detailedHoroscope.lucky.color}</p>
+                      <p><strong>{getTranslation('luckyNumber', lang)}</strong> {detailedHoroscope.lucky.number}</p>
+                      <p><strong>{getTranslation('keyDates', lang)}</strong> {detailedHoroscope.keyDates.join(', ')}</p>
                     </div>
                   </div>
                 )}
@@ -718,7 +719,7 @@ export default function HomePage() {
                       }}></div>
                     </div>
                   </div>
-                  <h3 style={{ marginBottom: '0.5rem', fontSize: '1.5rem', textAlign: 'center', fontFamily: 'var(--font-playfair), serif' }}>ADVANCED TAROT</h3>
+                  <h3 style={{ marginBottom: '0.5rem', fontSize: '1.5rem', textAlign: 'center', fontFamily: 'var(--font-playfair), serif' }}>{getTranslation('advancedTarot', lang)}</h3>
                   <div style={{
                     width: '3rem',
                     height: '1px',
@@ -729,7 +730,7 @@ export default function HomePage() {
                 
                 <div style={{ marginBottom: '1rem' }}>
                   <label style={{ display: 'block', marginBottom: '0.5rem', color: '#F4E4BC', fontSize: '0.875rem' }}>
-                    Spread Type:
+                    {getTranslation('spreadType', lang)}:
                   </label>
                   <select
                     value={selectedSpread}
@@ -746,12 +747,12 @@ export default function HomePage() {
 
                 <div style={{ marginBottom: '1rem' }}>
                   <label style={{ display: 'block', marginBottom: '0.5rem', color: '#F4E4BC', fontSize: '0.875rem' }}>
-                    Your Question (optional):
+                    {getTranslation('yourQuestion', lang)}:
                   </label>
                   <textarea
                     value={tarotQuestion}
                     onChange={(e) => setTarotQuestion(e.target.value)}
-                    placeholder="What guidance do you seek?"
+                    placeholder={getTranslation('whatGuidance', lang)}
                     style={{
                       ...styles.input,
                       height: '4rem',
@@ -769,7 +770,7 @@ export default function HomePage() {
                     opacity: tarotLoading ? 0.4 : 1
                   }}
                 >
-                  {tarotLoading ? "DRAWING CARDS..." : "DRAW ADVANCED SPREAD"}
+                  {tarotLoading ? getTranslation('drawingCards', lang) : getTranslation('drawAdvancedSpread', lang)}
                 </button>
 
                 {advancedTarot && (
@@ -790,7 +791,7 @@ export default function HomePage() {
                     </div>
 
                     <div style={{ padding: '1rem', background: 'rgba(11, 20, 38, 0.5)', borderRadius: '0.5rem', border: '1px solid rgba(212, 175, 55, 0.2)' }}>
-                      <h4 style={{ color: '#D4AF37', marginBottom: '0.75rem' }}>Reading:</h4>
+                      <h4 style={{ color: '#D4AF37', marginBottom: '0.75rem' }}>{getTranslation('reading', lang)}:</h4>
                       <p style={{ color: '#F4E4BC', fontSize: '0.875rem', lineHeight: '1.6', whiteSpace: 'pre-line' }}>
                         {advancedTarot.readingText}
                       </p>
@@ -804,7 +805,7 @@ export default function HomePage() {
       </main>
 
       <footer style={{ textAlign: 'center', marginTop: '3rem', padding: '2rem', color: 'rgba(212, 175, 55, 0.7)' }}>
-        <p>For entertainment and reflection. Not a substitute for professional advice.</p>
+        <p>{getTranslation('entertainmentNotice', lang)}</p>
       </footer>
     </div>
   );
