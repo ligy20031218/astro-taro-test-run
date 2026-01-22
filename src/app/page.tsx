@@ -1,9 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { getZodiacFromDate, type ZodiacSign } from "@/lib/zodiac";
 import { getHoroscope } from "@/lib/horoscope";
 import { drawTarot } from "@/lib/tarot";
+import { TAROT_SPREADS } from "@/lib/advanced-tarot";
+import type { HoroscopeUnit, TarotSession } from "@/lib/types";
+import TarotCardComponent from "@/components/TarotCard";
 
 type Horizon = "daily" | "monthly" | "yearly";
 
@@ -14,6 +17,17 @@ export default function HomePage() {
   const [fortune, setFortune] = useState<string>("");
   const [tarot, setTarot] = useState<ReturnType<typeof drawTarot> | null>(null);
   const [loading, setLoading] = useState(false);
+  
+  // Advanced features state
+  const [showAdvanced, setShowAdvanced] = useState(false);
+  const [detailedHoroscope, setDetailedHoroscope] = useState<HoroscopeUnit | null>(null);
+  const [advancedTarot, setAdvancedTarot] = useState<TarotSession | null>(null);
+  const [selectedSpread, setSelectedSpread] = useState<string>("3-card");
+  const [tarotQuestion, setTarotQuestion] = useState<string>("");
+  const [detailedHoroscopeScope, setDetailedHoroscopeScope] = useState<'daily'|'weekly'|'monthly'|'yearly'>('weekly');
+  const [horoscopeLoading, setHoroscopeLoading] = useState(false);
+  const [tarotLoading, setTarotLoading] = useState(false);
+  const userIdRef = useRef<string>('user-' + Date.now());
 
   const validDob = /^\d{4}-\d{2}-\d{2}$/.test(dob);
 
@@ -34,6 +48,60 @@ export default function HomePage() {
 
   function handleTarot() {
     setTarot(drawTarot());
+  }
+
+  async function handleDetailedHoroscope() {
+    if (!validDob) return;
+    setHoroscopeLoading(true);
+    try {
+      const currentZodiac = zodiac || getZodiacFromDate(new Date(dob));
+      const startDate = new Date().toISOString().split('T')[0];
+      const response = await fetch('/api/horoscope/detailed', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sign: currentZodiac,
+          scope: detailedHoroscopeScope,
+          startDate,
+          lang: 'en'
+        })
+      });
+      const data = await response.json();
+      if (data.success) {
+        setDetailedHoroscope(data.horoscope);
+        if (!zodiac) {
+          setZodiac(currentZodiac);
+        }
+      }
+    } catch (error) {
+      console.error("Error getting detailed horoscope:", error);
+    } finally {
+      setHoroscopeLoading(false);
+    }
+  }
+
+  async function handleAdvancedTarot() {
+    setTarotLoading(true);
+    try {
+      const response = await fetch('/api/tarot/advanced', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          spreadName: selectedSpread,
+          userId: userIdRef.current,
+          question: tarotQuestion,
+          lang: 'en'
+        })
+      });
+      const data = await response.json();
+      if (data.success) {
+        setAdvancedTarot(data.session);
+      }
+    } catch (error) {
+      console.error("Error getting advanced tarot:", error);
+    } finally {
+      setTarotLoading(false);
+    }
   }
 
   const styles = {
@@ -154,6 +222,12 @@ export default function HomePage() {
             <button onClick={handleTarot} style={styles.button}>
               Draw Tarot Cards
             </button>
+            <button 
+              onClick={() => setShowAdvanced(!showAdvanced)} 
+              style={{...styles.button, backgroundColor: showAdvanced ? 'rgba(212, 175, 55, 0.3)' : 'rgba(212, 175, 55, 0.1)'}}
+            >
+              {showAdvanced ? "Hide Advanced" : "Show Advanced Features"}
+            </button>
           </div>
         </div>
 
@@ -201,6 +275,193 @@ export default function HomePage() {
             )}
           </div>
         </div>
+
+        {/* Advanced Features Section */}
+        {showAdvanced && (
+          <div style={{ marginTop: '3rem' }}>
+            <h2 style={{ textAlign: 'center', fontSize: '2rem', marginBottom: '2rem', color: '#D4AF37' }}>
+              ⭐ ADVANCED COSMIC INSIGHTS ⭐
+            </h2>
+            
+            <div style={styles.grid}>
+              {/* Detailed Horoscope */}
+              <div style={styles.card}>
+                <h3 style={{ marginBottom: '1rem', fontSize: '1.5rem', textAlign: 'center' }}>DETAILED HOROSCOPE</h3>
+                
+                {zodiac && (
+                  <div style={{ textAlign: 'center', marginBottom: '1rem', padding: '0.5rem', background: 'rgba(212, 175, 55, 0.1)', borderRadius: '0.5rem' }}>
+                    <span style={{ color: '#F4E4BC' }}>Reading for: </span>
+                    <span style={{ color: '#D4AF37', fontWeight: 'bold' }}>{zodiac}</span>
+                  </div>
+                )}
+                
+                {validDob && (
+                  <div style={{ marginBottom: '1rem' }}>
+                    <label style={{ display: 'block', marginBottom: '0.5rem', color: '#F4E4BC', fontSize: '0.875rem' }}>
+                      Time Period:
+                    </label>
+                    <select
+                      value={detailedHoroscopeScope}
+                      onChange={(e) => setDetailedHoroscopeScope(e.target.value as any)}
+                      style={styles.input}
+                    >
+                      <option value="daily">Daily</option>
+                      <option value="weekly">Weekly</option>
+                      <option value="monthly">Monthly</option>
+                      <option value="yearly">Yearly</option>
+                    </select>
+                  </div>
+                )}
+                
+                <button
+                  onClick={handleDetailedHoroscope}
+                  disabled={!validDob || horoscopeLoading}
+                  style={{
+                    ...styles.button,
+                    width: '100%',
+                    opacity: (!validDob || horoscopeLoading) ? 0.4 : 1
+                  }}
+                >
+                  {horoscopeLoading ? "GENERATING..." : "GET DETAILED READING"}
+                </button>
+
+                {detailedHoroscope && (
+                  <div style={{ marginTop: '1.5rem' }}>
+                    {/* Scores */}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem', marginBottom: '1.5rem' }}>
+                      <div style={{ textAlign: 'center' }}>
+                        <div style={{ fontSize: '1.5rem', color: '#D4AF37', fontWeight: 'bold' }}>
+                          {detailedHoroscope.scores.love}
+                        </div>
+                        <div style={{ fontSize: '0.875rem', color: '#F4E4BC' }}>Love</div>
+                      </div>
+                      <div style={{ textAlign: 'center' }}>
+                        <div style={{ fontSize: '1.5rem', color: '#D4AF37', fontWeight: 'bold' }}>
+                          {detailedHoroscope.scores.career}
+                        </div>
+                        <div style={{ fontSize: '0.875rem', color: '#F4E4BC' }}>Career</div>
+                      </div>
+                      <div style={{ textAlign: 'center' }}>
+                        <div style={{ fontSize: '1.5rem', color: '#D4AF37', fontWeight: 'bold' }}>
+                          {detailedHoroscope.scores.wealth}
+                        </div>
+                        <div style={{ fontSize: '0.875rem', color: '#F4E4BC' }}>Wealth</div>
+                      </div>
+                      <div style={{ textAlign: 'center' }}>
+                        <div style={{ fontSize: '1.5rem', color: '#D4AF37', fontWeight: 'bold' }}>
+                          {detailedHoroscope.scores.health}
+                        </div>
+                        <div style={{ fontSize: '0.875rem', color: '#F4E4BC' }}>Health</div>
+                      </div>
+                    </div>
+
+                    {detailedHoroscope.summary && (
+                      <div style={{ marginBottom: '1rem', padding: '1rem', background: 'rgba(212, 175, 55, 0.1)', borderRadius: '0.5rem' }}>
+                        <h4 style={{ color: '#D4AF37', marginBottom: '0.5rem' }}>Summary</h4>
+                        <p style={{ color: '#F4E4BC', fontSize: '0.875rem', lineHeight: '1.6' }}>
+                          {detailedHoroscope.summary}
+                        </p>
+                      </div>
+                    )}
+
+                    {detailedHoroscope.suggestions && detailedHoroscope.suggestions.length > 0 && (
+                      <div style={{ marginBottom: '1rem' }}>
+                        <h4 style={{ color: '#D4AF37', marginBottom: '0.5rem' }}>Suggestions</h4>
+                        <ul style={{ color: '#F4E4BC', fontSize: '0.875rem', paddingLeft: '1.5rem' }}>
+                          {detailedHoroscope.suggestions.map((s, i) => (
+                            <li key={i} style={{ marginBottom: '0.25rem' }}>{s}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+
+                    <div style={{ fontSize: '0.875rem', color: '#F4E4BC' }}>
+                      <p><strong>Lucky Color:</strong> {detailedHoroscope.lucky.color}</p>
+                      <p><strong>Lucky Number:</strong> {detailedHoroscope.lucky.number}</p>
+                      <p><strong>Key Dates:</strong> {detailedHoroscope.keyDates.join(', ')}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Advanced Tarot */}
+              <div style={styles.card}>
+                <h3 style={{ marginBottom: '1rem', fontSize: '1.5rem', textAlign: 'center' }}>ADVANCED TAROT</h3>
+                
+                <div style={{ marginBottom: '1rem' }}>
+                  <label style={{ display: 'block', marginBottom: '0.5rem', color: '#F4E4BC', fontSize: '0.875rem' }}>
+                    Spread Type:
+                  </label>
+                  <select
+                    value={selectedSpread}
+                    onChange={(e) => setSelectedSpread(e.target.value)}
+                    style={styles.input}
+                  >
+                    {Object.entries(TAROT_SPREADS).map(([key, spread]) => (
+                      <option key={key} value={key}>
+                        {spread.name} ({spread.positions.length} cards)
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div style={{ marginBottom: '1rem' }}>
+                  <label style={{ display: 'block', marginBottom: '0.5rem', color: '#F4E4BC', fontSize: '0.875rem' }}>
+                    Your Question (optional):
+                  </label>
+                  <textarea
+                    value={tarotQuestion}
+                    onChange={(e) => setTarotQuestion(e.target.value)}
+                    placeholder="What guidance do you seek?"
+                    style={{
+                      ...styles.input,
+                      height: '4rem',
+                      resize: 'vertical'
+                    }}
+                  />
+                </div>
+
+                <button
+                  onClick={handleAdvancedTarot}
+                  disabled={tarotLoading}
+                  style={{
+                    ...styles.button,
+                    width: '100%',
+                    opacity: tarotLoading ? 0.4 : 1
+                  }}
+                >
+                  {tarotLoading ? "DRAWING CARDS..." : "DRAW ADVANCED SPREAD"}
+                </button>
+
+                {advancedTarot && (
+                  <div style={{ marginTop: '1.5rem' }}>
+                    <h4 style={{ color: '#D4AF37', marginBottom: '1rem', textAlign: 'center' }}>
+                      {advancedTarot.spread.name.toUpperCase()} SPREAD
+                    </h4>
+                    
+                    <div style={{ display: 'grid', gap: '1rem', marginBottom: '1rem' }}>
+                      {advancedTarot.cards.map((card, index) => (
+                        <TarotCardComponent
+                          key={index}
+                          card={card}
+                          position={advancedTarot.spread.positions[index]}
+                          showImage={true}
+                        />
+                      ))}
+                    </div>
+
+                    <div style={{ padding: '1rem', background: 'rgba(11, 20, 38, 0.5)', borderRadius: '0.5rem', border: '1px solid rgba(212, 175, 55, 0.2)' }}>
+                      <h4 style={{ color: '#D4AF37', marginBottom: '0.75rem' }}>Reading:</h4>
+                      <p style={{ color: '#F4E4BC', fontSize: '0.875rem', lineHeight: '1.6', whiteSpace: 'pre-line' }}>
+                        {advancedTarot.readingText}
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
       </main>
 
       <footer style={{ textAlign: 'center', marginTop: '3rem', padding: '2rem', color: 'rgba(212, 175, 55, 0.7)' }}>
