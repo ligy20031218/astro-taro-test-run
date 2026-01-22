@@ -121,7 +121,8 @@ export default function HomePage() {
       fontSize: '2.5rem',
       fontWeight: 'bold',
       marginBottom: '1rem',
-      color: '#D4AF37'
+      color: '#D4AF37',
+      fontFamily: 'var(--font-playfair), serif'
     },
     card: {
       background: 'rgba(11, 20, 38, 0.9)',
@@ -170,14 +171,14 @@ export default function HomePage() {
     <div style={styles.container}>
       <header style={styles.header}>
         <h1 style={styles.title}>🔮 TAROT & ASTROLOGY 🔮</h1>
-        <p style={{ color: '#F4E4BC', fontSize: '1.1rem' }}>
+        <p style={{ color: '#F4E4BC', fontSize: '1.1rem', fontFamily: 'var(--font-inter), sans-serif' }}>
           Discover your cosmic destiny through the ancient wisdom of the stars and tarot
         </p>
       </header>
 
       <main>
         <div style={styles.card}>
-          <h2 style={{ marginBottom: '1rem', fontSize: '1.5rem' }}>Enter Your Information</h2>
+          <h2 style={{ marginBottom: '1rem', fontSize: '1.5rem', fontFamily: 'var(--font-playfair), serif' }}>Enter Your Information</h2>
           
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '1rem' }}>
             <div>
@@ -233,10 +234,10 @@ export default function HomePage() {
 
         <div style={styles.grid}>
           <div style={styles.card}>
-            <h2 style={{ marginBottom: '1rem', fontSize: '1.5rem' }}>Zodiac Sign</h2>
+            <h2 style={{ marginBottom: '1rem', fontSize: '1.5rem', fontFamily: 'var(--font-playfair), serif' }}>Zodiac Sign</h2>
             {zodiac ? (
               <div style={styles.result}>
-                <p style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '0.5rem' }}>
+                <p style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '0.5rem', fontFamily: 'var(--font-playfair), serif' }}>
                   {zodiac}
                 </p>
                 {fortune && (
@@ -254,7 +255,7 @@ export default function HomePage() {
           </div>
 
           <div style={styles.card}>
-            <h2 style={{ marginBottom: '1rem', fontSize: '1.5rem' }}>Tarot Reading</h2>
+            <h2 style={{ marginBottom: '1rem', fontSize: '1.5rem', fontFamily: 'var(--font-playfair), serif' }}>Tarot Reading</h2>
             {tarot ? (
               <div>
                 <p style={{ marginBottom: '1rem', color: '#F4E4BC', fontStyle: 'italic' }}>
@@ -279,14 +280,14 @@ export default function HomePage() {
         {/* Advanced Features Section */}
         {showAdvanced && (
           <div style={{ marginTop: '3rem' }}>
-            <h2 style={{ textAlign: 'center', fontSize: '2rem', marginBottom: '2rem', color: '#D4AF37' }}>
+            <h2 style={{ textAlign: 'center', fontSize: '2rem', marginBottom: '2rem', color: '#D4AF37', fontFamily: 'var(--font-playfair), serif' }}>
               ⭐ ADVANCED COSMIC INSIGHTS ⭐
             </h2>
             
             <div style={styles.grid}>
               {/* Detailed Horoscope */}
               <div style={styles.card}>
-                <h3 style={{ marginBottom: '1rem', fontSize: '1.5rem', textAlign: 'center' }}>DETAILED HOROSCOPE</h3>
+                <h3 style={{ marginBottom: '1rem', fontSize: '1.5rem', textAlign: 'center', fontFamily: 'var(--font-playfair), serif' }}>DETAILED HOROSCOPE</h3>
                 
                 {zodiac && (
                   <div style={{ textAlign: 'center', marginBottom: '1rem', padding: '0.5rem', background: 'rgba(212, 175, 55, 0.1)', borderRadius: '0.5rem' }}>
@@ -386,7 +387,7 @@ export default function HomePage() {
 
               {/* Advanced Tarot */}
               <div style={styles.card}>
-                <h3 style={{ marginBottom: '1rem', fontSize: '1.5rem', textAlign: 'center' }}>ADVANCED TAROT</h3>
+                <h3 style={{ marginBottom: '1rem', fontSize: '1.5rem', textAlign: 'center', fontFamily: 'var(--font-playfair), serif' }}>ADVANCED TAROT</h3>
                 
                 <div style={{ marginBottom: '1rem' }}>
                   <label style={{ display: 'block', marginBottom: '0.5rem', color: '#F4E4BC', fontSize: '0.875rem' }}>
