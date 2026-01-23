@@ -51,7 +51,7 @@ export default function HomePage() {
   }
 
   function handleTarot() {
-    setTarot(drawTarot());
+    setTarot(drawTarot(lang));
   }
 
   async function handleDetailedHoroscope() {
@@ -116,6 +116,11 @@ export default function HomePage() {
     // Refresh basic horoscope if zodiac is set
     if (zodiac && validDob && !loading) {
       getHoroscope(zodiac as ZodiacSign, horizon, lang).then(setFortune);
+    }
+
+    // Refresh basic tarot if cards are drawn
+    if (tarot) {
+      setTarot(drawTarot(lang));
     }
 
     const shouldRefreshHoroscope = !!detailedHoroscope && validDob && !horoscopeLoading;
@@ -599,7 +604,7 @@ export default function HomePage() {
                 
                 {zodiac && (
                   <div style={{ textAlign: 'center', marginBottom: '1rem', padding: '0.5rem', background: 'rgba(212, 175, 55, 0.1)', borderRadius: '0.5rem' }}>
-                    <span style={{ color: '#F4E4BC' }}>Reading for: </span>
+                    <span style={{ color: '#F4E4BC' }}>{getTranslation('readingFor', lang)} </span>
                     <span style={{ color: '#D4AF37', fontWeight: 'bold' }}>{zodiac}</span>
                   </div>
                 )}

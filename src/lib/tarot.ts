@@ -39,16 +39,19 @@ function shuffle<T>(arr: T[]): T[] {
   return a;
 }
 
-export function drawTarot() {
+import { translateText, type SupportedLang } from "./i18n";
+
+export function drawTarot(lang: SupportedLang = 'en') {
   const picks = shuffle(deck).slice(0, 3).map((c) => {
     const reversed = Math.random() < 0.5;
     return {
       id: c.id,
       name: c.name,
       reversed,
-      meaning: reversed ? c.meaningReversed : c.meaningUpright
+      meaning: translateText(reversed ? c.meaningReversed : c.meaningUpright, lang)
     };
   });
-  return { cards: picks, summary: "Three-card spread: past, present, future." };
+  const summaryText = "Three-card spread: past, present, future.";
+  return { cards: picks, summary: translateText(summaryText, lang) };
 }
 

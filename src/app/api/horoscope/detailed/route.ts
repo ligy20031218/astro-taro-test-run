@@ -26,6 +26,7 @@ export async function POST(request: Request) {
     const localized = {
       ...horoscope,
       summary: translateText(horoscope.summary || '', lang),
+      suggestions: translateList(horoscope.suggestions || [], lang),
       tipsDo: translateList(horoscope.tipsDo, lang),
       tipsDont: translateList(horoscope.tipsDont, lang),
       sections: (horoscope.sections || []).map((s: { id: string; title: string; content: string }) => ({
