@@ -85,6 +85,10 @@ export default function HomePage() {
   }
 
   async function handleAdvancedTarot() {
+    if (!selectedSpread) {
+      console.error("No spread selected");
+      return;
+    }
     setTarotLoading(true);
     try {
       const response = await fetch('/api/tarot/advanced', {
@@ -97,12 +101,18 @@ export default function HomePage() {
           lang
         })
       });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
       const data = await response.json();
       if (data.success) {
         setAdvancedTarot(data.session);
+      } else {
+        console.error("API returned error:", data.error);
       }
     } catch (error) {
       console.error("Error getting advanced tarot:", error);
+      alert("Failed to draw tarot cards. Please try again.");
     } finally {
       setTarotLoading(false);
     }

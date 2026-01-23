@@ -1,4 +1,7 @@
 import type { HoroscopeUnit } from './types';
+import type { SupportedLang } from './i18n';
+import { detailedHoroscopeTranslations } from './detailed-horoscope-translations';
+import { suggestionsTranslations } from './suggestions-translations';
 
 // Deterministic random number generator for consistent results
 function seededRandom(seed: string): () => number {
@@ -20,7 +23,8 @@ function seededRandom(seed: string): () => number {
 export function generateDetailedHoroscope(
   sign: string, 
   scope: 'daily'|'weekly'|'monthly'|'yearly',
-  startDate: string
+  startDate: string,
+  lang: SupportedLang = 'en'
 ): Omit<HoroscopeUnit, 'text'> {
   const now = new Date();
   const start = new Date(startDate);
@@ -60,8 +64,8 @@ export function generateDetailedHoroscope(
   const keyDates = generateKeyDates(start, end, 3, random);
 
   // Generate tips
-  const tipsDo = generateTips('do', sign, scope);
-  const tipsDont = generateTips('dont', sign, scope);
+  const tipsDo = generateTips('do', sign, scope, lang);
+  const tipsDont = generateTips('dont', sign, scope, lang);
 
   // Lucky elements
   const lucky = {
@@ -73,8 +77,8 @@ export function generateDetailedHoroscope(
   const sections = generateHoroscopeSections(sign, scope, start, end, random);
 
   // Generate overall summary and suggestions
-  const summary = generateOverallSummary(sign, scope, scores, random);
-  const suggestions = generateSuggestions(sign, scope, scores, random);
+  const summary = generateOverallSummary(sign, scope, scores, random, lang);
+  const suggestions = generateSuggestions(sign, scope, scores, random, lang);
 
   return {
     scope,
@@ -124,7 +128,7 @@ function generateKeyDates(start: Date, end: Date, count: number, random: () => n
   return dates.sort();
 }
 
-function generateTips(type: 'do'|'dont', sign: string, scope: string): string[] {
+function generateTips(type: 'do'|'dont', sign: string, scope: string, lang: SupportedLang = 'en'): string[] {
   const tips = {
     do: [
       `Trust your ${sign} intuition in decision-making`,
@@ -559,160 +563,80 @@ The minor limits suggest that this period will be particularly significant for $
 }
 
 // Generate overall summary of the horoscope reading
-function generateOverallSummary(sign: string, scope: string, scores: { love: number; career: number; wealth: number; health: number }, random: () => number): string {
+function generateOverallSummary(sign: string, scope: string, scores: { love: number; career: number; wealth: number; health: number }, random: () => number, lang: SupportedLang = 'en'): string {
+  const t = detailedHoroscopeTranslations[lang];
   const highestScore = Math.max(scores.love, scores.career, scores.wealth, scores.health);
   const lowestScore = Math.min(scores.love, scores.career, scores.wealth, scores.health);
   
   const scoreAreas = {
-    love: 'relationships and emotional connections',
-    career: 'professional development and career advancement',
-    wealth: 'financial stability and material success',
-    health: 'physical well-being and vitality'
+    love: t.relationships,
+    career: t.professional,
+    wealth: t.financial,
+    health: t.physical
   };
   
   const highestArea = Object.entries(scores).find(([, score]) => score === highestScore)?.[0] || 'love';
   const lowestArea = Object.entries(scores).find(([, score]) => score === lowestScore)?.[0] || 'health';
   
-  const scopeDescriptions = {
-    daily: 'today brings',
-    weekly: 'this week offers',
-    monthly: 'this month presents',
-    yearly: 'this year holds'
+  const scopeDescriptions: Record<string, string> = {
+    daily: t.todayBrings,
+    weekly: t.thisWeekOffers,
+    monthly: t.thisMonthPresents,
+    yearly: t.thisYearHolds
   };
   
-  const scopeDescription = scopeDescriptions[scope as keyof typeof scopeDescriptions] || 'this period brings';
+  const scopeDescription = scopeDescriptions[scope] || t.thisPeriodBrings;
   
-  const energyLevel = highestScore > 80 ? 'exceptionally strong' : highestScore > 70 ? 'very positive' : highestScore > 60 ? 'generally favorable' : 'mixed but promising';
-  const challengeLevel = lowestScore < 50 ? 'some challenges' : lowestScore < 60 ? 'moderate obstacles' : 'minimal difficulties';
+  const energyLevel = highestScore > 80 ? t.exceptionallyStrong : highestScore > 70 ? t.veryPositive : highestScore > 60 ? t.generallyFavorable : t.mixedButPromising;
+  const challengeLevel = lowestScore < 50 ? t.someChallenges : lowestScore < 60 ? t.moderateObstacles : t.minimalDifficulties;
+  const supportLevel = random() > 0.5 ? t.powerfullySupported : t.gentlyGuided;
+  const energyType = random() > 0.5 ? t.timeOfExpansion : t.periodOfConsolidation;
+  const emphasis = random() > 0.5 ? t.takingInitiative : t.beingPatient;
+  const nature = random() > 0.5 ? t.amplifiedAndCelebrated : t.challengedAndRefined;
+  const trajectory = random() > 0.5 ? t.upwardAndOptimistic : t.steadyAndTransformative;
+  const action = random() > 0.5 ? t.exploringNew : t.focusingOnExisting;
+  const encouragement = random() > 0.5 ? t.growthAndExpansion : t.wisdomAndMaturity;
+  const advice = random() > 0.5 ? t.embraceOpportunities : t.focusOnAreas;
   
-  return `Your ${scope} horoscope reveals a ${energyLevel} cosmic alignment for your ${sign} energy. ${scopeDescription} significant opportunities in ${scoreAreas[highestArea as keyof typeof scoreAreas]}, with your natural ${sign} tendencies being ${random() > 0.5 ? 'powerfully supported' : 'gently guided'} by current planetary influences.
-
-The overall energy suggests ${random() > 0.5 ? 'a time of expansion and growth' : 'a period of consolidation and refinement'}, with particular emphasis on ${random() > 0.5 ? 'taking initiative and making bold moves' : 'being patient and building solid foundations'}. Your ${sign} nature is being ${random() > 0.5 ? 'amplified and celebrated' : 'challenged and refined'} by the current cosmic weather.
-
-While you may encounter ${challengeLevel} in ${scoreAreas[lowestArea as keyof typeof scoreAreas]}, the overall trajectory is ${random() > 0.5 ? 'upward and optimistic' : 'steady and transformative'}. This ${scope} period is particularly suited for ${random() > 0.5 ? 'exploring new possibilities and taking calculated risks' : 'focusing on existing goals and deepening commitments'}.
-
-The cosmic energy supports your natural ${sign} tendencies while encouraging ${random() > 0.5 ? 'growth and expansion' : 'wisdom and maturity'}. Trust your intuition and ${random() > 0.5 ? 'embrace the opportunities that come your way' : 'focus on the areas that need your attention'}.`;
+  const part1 = t.horoscopeReveals(scope, energyLevel, sign);
+  const part2 = t.offersOpportunities(scopeDescription, scoreAreas[highestArea as keyof typeof scoreAreas], sign, supportLevel);
+  const part3 = t.overallEnergy(energyType, emphasis, sign, nature);
+  const part4 = t.whileEncounter(challengeLevel, scoreAreas[lowestArea as keyof typeof scoreAreas], trajectory);
+  const part5 = t.periodSuited(scope, action);
+  const part6 = t.cosmicEnergy(sign, encouragement, advice);
+  
+  return `${part1} ${part2}\n\n${part3}\n\n${part4} ${part5}\n\n${part6}`;
 }
 
 // Generate practical suggestions for the horoscope reading
-function generateSuggestions(sign: string, scope: string, scores: { love: number; career: number; wealth: number; health: number }, random: () => number): string[] {
+function generateSuggestions(sign: string, scope: string, scores: { love: number; career: number; wealth: number; health: number }, random: () => number, lang: SupportedLang = 'en'): string[] {
+  const t = suggestionsTranslations[lang];
   const suggestions: string[] = [];
   
-  // General suggestions based on sign
-  const signSuggestions = {
-    'Aries': [
-      'Take the lead in new initiatives and don\'t be afraid to be the first to act',
-      'Channel your natural energy into physical activities and competitive pursuits',
-      'Be mindful of impatience and practice listening before reacting'
-    ],
-    'Taurus': [
-      'Focus on building long-term stability and financial security',
-      'Indulge in sensory pleasures and appreciate the beauty around you',
-      'Avoid becoming too rigid in your thinking and stay open to change'
-    ],
-    'Gemini': [
-      'Engage in learning new skills and expanding your knowledge base',
-      'Use your communication talents to build meaningful connections',
-      'Be careful not to spread yourself too thin across too many projects'
-    ],
-    'Cancer': [
-      'Nurture your emotional well-being and spend time with loved ones',
-      'Trust your intuition and pay attention to your dreams and feelings',
-      'Don\'t let fear hold you back from taking necessary risks'
-    ],
-    'Leo': [
-      'Express your creativity and share your talents with the world',
-      'Take center stage when appropriate and don\'t shy away from recognition',
-      'Remember to be generous and consider others\' needs as well'
-    ],
-    'Virgo': [
-      'Focus on improving your skills and helping others through service',
-      'Pay attention to details but don\'t get lost in perfectionism',
-      'Take care of your health and maintain a balanced routine'
-    ],
-    'Libra': [
-      'Seek harmony in relationships and work on diplomatic solutions',
-      'Appreciate art, beauty, and aesthetic experiences',
-      'Make decisions based on what feels right, not just what others want'
-    ],
-    'Scorpio': [
-      'Embrace transformation and let go of what no longer serves you',
-      'Use your depth and intensity to create meaningful change',
-      'Be honest about your motivations and avoid manipulation'
-    ],
-    'Sagittarius': [
-      'Expand your horizons through travel, education, or new experiences',
-      'Share your wisdom and philosophical insights with others',
-      'Be mindful of making promises you can\'t keep'
-    ],
-    'Capricorn': [
-      'Focus on long-term goals and build solid foundations for the future',
-      'Take on leadership roles and demonstrate your reliability',
-      'Remember to have fun and not take life too seriously'
-    ],
-    'Aquarius': [
-      'Connect with like-minded people and work toward humanitarian goals',
-      'Embrace your uniqueness and don\'t conform to others\' expectations',
-      'Balance your need for independence with meaningful relationships'
-    ],
-    'Pisces': [
-      'Trust your intuition and pay attention to your spiritual side',
-      'Use your compassion to help others and make a positive impact',
-      'Set healthy boundaries and don\'t lose yourself in others\' problems'
-    ]
-  };
-  
   // Add sign-specific suggestions
-  const signSpecific = signSuggestions[sign as keyof typeof signSuggestions] || signSuggestions['Aries'];
+  const signSpecific = t.signSuggestions[sign as keyof typeof t.signSuggestions] || t.signSuggestions['Aries'];
   suggestions.push(...signSpecific.slice(0, 2));
   
   // Add scope-specific suggestions
-  const scopeSuggestions = {
-    daily: [
-      'Start your day with intention and set clear goals for what you want to accomplish',
-      'Take breaks throughout the day to check in with your energy and emotions',
-      'End your day with gratitude and reflection on what went well'
-    ],
-    weekly: [
-      'Plan your week ahead but remain flexible to unexpected opportunities',
-      'Focus on one major goal while maintaining progress on smaller tasks',
-      'Schedule time for both work and personal activities to maintain balance'
-    ],
-    monthly: [
-      'Review your monthly goals and adjust your approach based on what you\'ve learned',
-      'Take time to evaluate your relationships and make necessary improvements',
-      'Invest in your personal development through learning or new experiences'
-    ],
-    yearly: [
-      'Set long-term vision and break it down into achievable quarterly milestones',
-      'Invest in relationships and opportunities that align with your life purpose',
-      'Take calculated risks that could lead to significant personal or professional growth'
-    ]
-  };
-  
-  const scopeSpecific = scopeSuggestions[scope as keyof typeof scopeSuggestions] || scopeSuggestions['weekly'];
+  const scopeSpecific = t.scopeSuggestions[scope as keyof typeof t.scopeSuggestions] || t.scopeSuggestions['weekly'];
   suggestions.push(...scopeSpecific.slice(0, 2));
   
   // Add score-based suggestions
   if (scores.love < 60) {
-    suggestions.push('Focus on improving communication and emotional connection in your relationships');
+    suggestions.push(t.scoreBased.love);
   }
   if (scores.career < 60) {
-    suggestions.push('Consider new learning opportunities or networking to advance your professional goals');
+    suggestions.push(t.scoreBased.career);
   }
   if (scores.wealth < 60) {
-    suggestions.push('Review your financial habits and create a practical budget for better money management');
+    suggestions.push(t.scoreBased.wealth);
   }
   if (scores.health < 60) {
-    suggestions.push('Prioritize self-care and establish a consistent wellness routine');
+    suggestions.push(t.scoreBased.health);
   }
   
   // Add general suggestions
-  suggestions.push(
-    'Trust your intuition and inner wisdom when making important decisions',
-    'Stay open to unexpected opportunities that may come your way',
-    'Practice gratitude daily to attract more positive energy into your life'
-  );
+  suggestions.push(...t.general);
   
   // Remove duplicates and limit to 6 suggestions
   const uniqueSuggestions = [...new Set(suggestions)];

@@ -20,13 +20,12 @@ export async function POST(request: Request) {
       );
     }
 
-    const horoscope = generateDetailedHoroscope(sign, scope, startDate);
+    const horoscope = generateDetailedHoroscope(sign, scope, startDate, lang);
 
-    // Translate key textual fields
+    // Summary and suggestions are already generated in the target language
+    // Just translate tips and sections
     const localized = {
       ...horoscope,
-      summary: translateText(horoscope.summary || '', lang),
-      suggestions: translateList(horoscope.suggestions || [], lang),
       tipsDo: translateList(horoscope.tipsDo, lang),
       tipsDont: translateList(horoscope.tipsDont, lang),
       sections: (horoscope.sections || []).map((s: { id: string; title: string; content: string }) => ({
