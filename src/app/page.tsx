@@ -269,7 +269,7 @@ export default function HomePage() {
         
         <div style={{ position: 'relative', zIndex: 10 }}>
           {/* Language Selector Button */}
-          <div style={{ position: 'absolute', top: '0', right: '0', zIndex: 20 }} data-lang-menu>
+          <div style={{ position: 'absolute', top: '1rem', right: '1rem', zIndex: 20 }} data-lang-menu>
             <button
               onClick={() => setShowLangMenu(!showLangMenu)}
               data-lang-menu
@@ -361,7 +361,7 @@ export default function HomePage() {
         </div>
       </header>
 
-      <main>
+      <main key={lang}>
         <div style={styles.card}>
           <h2 style={{ marginBottom: '1rem', fontSize: '1.5rem', fontFamily: 'var(--font-playfair), serif' }}>{getTranslation('enterInformation', lang)}</h2>
           
@@ -380,16 +380,16 @@ export default function HomePage() {
             
             <div>
               <label style={{ display: 'block', marginBottom: '0.5rem', color: '#F4E4BC' }}>
-                Timeframe
+                {getTranslation('timeframe', lang)}
               </label>
               <select
                 value={horizon}
                 onChange={(e) => setHorizon(e.target.value as Horizon)}
                 style={styles.input}
               >
-                <option value="daily">Daily</option>
-                <option value="monthly">Monthly</option>
-                <option value="yearly">Yearly</option>
+                <option value="daily">{getTranslation('daily', lang)}</option>
+                <option value="monthly">{getTranslation('monthly', lang)}</option>
+                <option value="yearly">{getTranslation('yearly', lang)}</option>
               </select>
             </div>
             
