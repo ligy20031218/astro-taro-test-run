@@ -39,7 +39,8 @@ function shuffle<T>(arr: T[]): T[] {
   return a;
 }
 
-import { translateText, type SupportedLang } from "./i18n";
+import type { SupportedLang } from "./i18n";
+import { getTarotCardMeaning, getTarotSummaryTranslation } from "./content-translations";
 
 export function drawTarot(lang: SupportedLang = 'en') {
   const picks = shuffle(deck).slice(0, 3).map((c) => {
@@ -48,10 +49,9 @@ export function drawTarot(lang: SupportedLang = 'en') {
       id: c.id,
       name: c.name,
       reversed,
-      meaning: translateText(reversed ? c.meaningReversed : c.meaningUpright, lang)
+      meaning: getTarotCardMeaning(c.name, reversed, lang)
     };
   });
-  const summaryText = "Three-card spread: past, present, future.";
-  return { cards: picks, summary: translateText(summaryText, lang) };
+  return { cards: picks, summary: getTarotSummaryTranslation(lang) };
 }
 
