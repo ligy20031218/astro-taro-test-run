@@ -110,6 +110,9 @@ export default function HomePage() {
 
   // Auto-refresh current readings when language changes
   useEffect(() => {
+    // Force a re-render by updating a dummy state if needed
+    // React should automatically re-render when lang changes, but this ensures it
+    
     // Refresh basic horoscope if zodiac is set
     if (zodiac && validDob && !loading) {
       getHoroscope(zodiac as ZodiacSign, horizon, lang).then(setFortune);
@@ -311,6 +314,7 @@ export default function HomePage() {
                   <button
                     key={language.code}
                     onClick={() => {
+                      console.log('Changing language to:', language.code);
                       setLang(language.code);
                       setShowLangMenu(false);
                     }}
