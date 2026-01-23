@@ -16,19 +16,16 @@ export async function POST(request: Request) {
     const date = new Date().toISOString().split('T')[0];
     const seed = generateSeed(userId, date, question || "");
     
-    const session = drawTarotCards(spreadName, seed, question);
+    const session = drawTarotCards(spreadName, seed, question, lang);
     const suggestions = getFollowUpSuggestions(session);
 
-    // Localize session reading and positions (keep card names as-is for now)
+    // Reading text is already translated in drawTarotCards, just translate positions
     const localizedSession = {
       ...session,
       spread: {
         ...session.spread,
-        name: translateText(session.spread.name, lang),
         positions: session.spread.positions.map((p: string) => translateText(p, lang))
-      },
-      question: translateText(session.question, lang),
-      readingText: translateText(session.readingText, lang)
+      }
     };
     
     return NextResponse.json({

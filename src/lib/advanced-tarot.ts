@@ -1,4 +1,7 @@
 import type { TarotCard, TarotSpread, TarotSession } from './types';
+import type { SupportedLang } from './i18n';
+import { advancedTarotTranslations } from './advanced-tarot-translations';
+import { getTarotCardMeaning } from './content-translations';
 
 // Complete 78-card tarot deck
 export const TAROT_DECK: TarotCard[] = [
@@ -484,7 +487,8 @@ function shuffleDeck(deck: TarotCard[], random: () => number): TarotCard[] {
 export function drawTarotCards(
   spreadName: string,
   seed: string,
-  question: string = ""
+  question: string = "",
+  lang: SupportedLang = 'en'
 ): TarotSession {
   const spread = TAROT_SPREADS[spreadName];
   if (!spread) {
@@ -505,7 +509,7 @@ export function drawTarotCards(
     };
   });
 
-  const readingText = generateReadingText(cards, spread, question);
+  const readingText = generateReadingText(cards, spread, question, lang);
 
   return {
     seed,
@@ -520,22 +524,23 @@ export function drawTarotCards(
 function generateReadingText(
   cards: (TarotCard & { positionIndex: number; })[],
   spread: TarotSpread,
-  question: string
+  question: string,
+  lang: SupportedLang = 'en'
 ): string {
-  let reading = `Your ${spread.name} spread reveals the following insights:\n\n`;
+  const t = advancedTarotTranslations[lang];
+  let reading = t.spreadReveals(spread.name);
 
   // Individual card interpretations
   cards.forEach((card, index) => {
     const position = spread.positions[index];
-    const meaning = CARD_MEANINGS[card.name] || { upright: "Unknown meaning", reversed: "Unknown meaning" };
-    const cardMeaning = card.upright ? meaning.upright : meaning.reversed;
+    const cardMeaning = getTarotCardMeaning(card.name, !card.upright, lang);
     
-    reading += `**${position}**: ${card.name} ${card.upright ? '(Upright)' : '(Reversed)'}\n`;
+    reading += `**${position}**: ${card.name} ${card.upright ? t.upright : t.reversed}\n`;
     reading += `${cardMeaning}\n\n`;
   });
 
   // Direct, straightforward analysis
-  reading += `**Direct Analysis**: `;
+  reading += t.directAnalysis;
   
   const majorArcanaCount = cards.filter(c => c.arcana === 'major').length;
   const reversedCount = cards.filter(c => !c.upright).length;
@@ -561,34 +566,34 @@ function generateReadingText(
     
     // Direct relationship analysis
     if (you.name === 'The Lovers' && them.name === 'The Lovers') {
-      reading += "Based on these cards, both of you are deeply committed and this relationship has strong potential for long-term success. ";
+      reading += t.basedOnCards + t.relationshipCommitted;
     } else if (you.suit === 'cups' && them.suit === 'cups') {
-      reading += "Based on these cards, you both prioritize emotional connection, making this relationship likely to be very fulfilling. ";
+      reading += t.basedOnCards + t.relationshipEmotional;
     } else if (challenges.name === 'The Devil') {
-      reading += "Based on these cards, there are some unhealthy patterns or dependencies that need to be addressed for this relationship to thrive. ";
+      reading += t.basedOnCards + t.relationshipUnhealthy;
     } else if (advice.name === 'The Magician') {
-      reading += "Based on these cards, you have the power to manifest positive changes in this relationship if you take action. ";
+      reading += t.basedOnCards + t.relationshipPower;
     } else {
       // General relationship analysis
-      reading += `Based on these cards, your relationship shows ${you.name} energy meeting ${them.name} energy, creating a ${dynamic.name} dynamic. `;
+      reading += t.basedOnCards + t.relationshipGeneral(you.name, them.name, dynamic.name);
     }
     
     // Direct compatibility assessment
     if (you.suit === them.suit) {
-      reading += "Your energy types match well, suggesting natural compatibility. ";
+      reading += t.energyMatch;
     } else if ((you.suit === 'cups' && them.suit === 'wands') || (you.suit === 'wands' && them.suit === 'cups')) {
-      reading += "Your complementary energies create a passionate and dynamic connection. ";
+      reading += t.energyComplementary;
     } else {
-      reading += "Your different energy types can create a balanced and dynamic relationship. ";
+      reading += t.energyDifferent;
     }
     
     // Direct communication analysis
     if (communication.name === 'Ace of Cups') {
-      reading += "Communication between you is likely to be open and heartfelt. ";
+      reading += t.communicationOpen;
     } else if (communication.name === 'Seven of Swords') {
-      reading += "There may be some dishonesty or hidden agendas in communication that need addressing. ";
+      reading += t.communicationDishonest;
     } else {
-      reading += `Communication is influenced by ${communication.name} energy, suggesting ${communication.upright ? 'positive' : 'challenging'} dynamics. `;
+      reading += t.communicationGeneral(communication.name, communication.upright);
     }
     
   } else if (spread.name === '3-card') {
@@ -598,16 +603,16 @@ function generateReadingText(
     
     // Direct timeline analysis
     if (past.arcana === 'major' && present.arcana === 'major' && future.arcana === 'major') {
-      reading += "Based on these cards, you're going through a major life transformation that will lead to significant positive changes. ";
+      reading += t.basedOnCards + t.majorTransformation;
     } else if (future.name === 'The Sun') {
-      reading += "Based on these cards, your future looks very bright with success and happiness ahead. ";
+      reading += t.basedOnCards + t.futureBright;
     } else if (future.name === 'The Tower') {
-      reading += "Based on these cards, there may be a significant change or upheaval coming that will ultimately be for your highest good. ";
+      reading += t.basedOnCards + t.futureChange;
     } else if (future.suit === 'pentacles') {
-      reading += "Based on these cards, your future is likely to involve material success and stability. ";
+      reading += t.basedOnCards + t.materialSuccess;
     } else {
       // General timeline analysis
-      reading += `Your journey from ${past.name} through ${present.name} leads to ${future.name}, showing a clear progression. `;
+      reading += t.journeyProgression(past.name, present.name, future.name);
     }
     
   } else if (spread.name === 'celtic') {
@@ -617,90 +622,96 @@ function generateReadingText(
     
     // Direct situation analysis
     if (currentSituation.name === 'The World' && outcome.name === 'The World') {
-      reading += "Based on these cards, you're completing a major life cycle and moving toward fulfillment and success. ";
+      reading += t.basedOnCards + t.celticCompletion;
     } else if (challenge.name === 'The Devil') {
-      reading += "Based on these cards, your main challenge involves breaking free from limiting beliefs or unhealthy patterns. ";
+      reading += t.basedOnCards + t.celticChallenge;
     } else if (outcome.name === 'The Star') {
-      reading += "Based on these cards, the outcome looks hopeful with healing and renewal on the horizon. ";
+      reading += t.basedOnCards + t.celticOutcome;
     } else {
       // General Celtic analysis
-      reading += `Your current situation (${currentSituation.name}) faces the challenge of ${challenge.name}, with a possible outcome of ${outcome.name}. `;
+      reading += t.celticGeneral(currentSituation.name, challenge.name, outcome.name);
     }
   } else {
     // General analysis for other spreads
-    reading += `This ${spread.name} spread reveals important insights about your situation. `;
+    reading += t.generalSpread(spread.name);
   }
   
   // Add general analysis based on card types
   if (majorArcanaCount >= 3) {
-    reading += "The presence of multiple Major Arcana cards indicates this is a significant time of spiritual growth and transformation. ";
+    reading += t.multipleMajorArcana;
   } else if (majorArcanaCount >= 2) {
-    reading += "Major Arcana cards suggest important life themes and spiritual lessons are at play. ";
+    reading += t.someMajorArcana;
   }
   
   if (reversedCount > cards.length / 2) {
-    reading += "Multiple reversed cards suggest internal work and self-reflection are needed. ";
+    reading += t.multipleReversed;
   } else if (reversedCount > 0) {
-    reading += "Some reversed cards indicate areas where you may need to look inward or approach things differently. ";
+    reading += t.someReversed;
   } else {
-    reading += "All upright cards suggest clear, direct energy flow and positive momentum. ";
+    reading += t.allUpright;
   }
   
   // Direct question analysis
   if (question) {
-    reading += `\n\n**Direct Answer to "${question}"**: `;
+    reading += t.directAnswer(question);
     
     // Analyze for specific question types
-    if (question.toLowerCase().includes('cheat') || question.toLowerCase().includes('faithful')) {
+    const questionLower = question.toLowerCase();
+    if (questionLower.includes('cheat') || questionLower.includes('faithful')) {
       const loyaltyCards = cards.filter(c => 
         c.name === 'The Lovers' || c.name === 'Two of Cups' || c.name === 'Ten of Cups' ||
         c.name === 'The Devil' || c.name === 'Seven of Swords' || c.name === 'Five of Swords'
       );
       
       if (loyaltyCards.some(c => c.name === 'The Lovers' || c.name === 'Two of Cups')) {
-        reading += "Based on these cards, this person's traits suggest they are likely to be faithful and committed. ";
+        reading += t.basedOnCards + t.loyaltyFaithful;
       } else if (loyaltyCards.some(c => c.name === 'The Devil' || c.name === 'Seven of Swords')) {
-        reading += "Based on these cards, there may be some concerns about loyalty that need to be addressed. ";
+        reading += t.basedOnCards + t.loyaltyConcerns;
       } else {
-        reading += "Based on these cards, the relationship dynamics suggest a need for open communication and trust-building. ";
+        reading += t.basedOnCards + t.loyaltyCommunication;
       }
-    } else if (question.toLowerCase().includes('love') || question.toLowerCase().includes('relationship')) {
+    } else if (questionLower.includes('love') || questionLower.includes('relationship')) {
       const loveCards = cards.filter(c => c.suit === 'cups' || c.name === 'The Lovers');
       if (loveCards.length >= 2) {
-        reading += "Based on these cards, love and emotional connection are strong themes, suggesting positive relationship potential. ";
+        reading += t.basedOnCards + t.loveStrong;
       } else {
-        reading += "Based on these cards, emotional connection and relationship dynamics are important themes to consider. ";
+        reading += t.basedOnCards + t.loveImportant;
       }
-    } else if (question.toLowerCase().includes('career') || question.toLowerCase().includes('job')) {
+    } else if (questionLower.includes('career') || questionLower.includes('job')) {
       const careerCards = cards.filter(c => c.suit === 'pentacles' || c.name === 'The Magician' || c.name === 'The Emperor');
       if (careerCards.length >= 2) {
-        reading += "Based on these cards, career success and material achievement are likely outcomes. ";
+        reading += t.basedOnCards + t.careerSuccess;
       } else {
-        reading += "Based on these cards, professional growth and material stability are key themes in your situation. ";
+        reading += t.basedOnCards + t.careerGrowth;
       }
-    } else if (question.toLowerCase().includes('future')) {
+    } else if (questionLower.includes('future')) {
       const futureCards = cards.filter(c => c.name === 'The Sun' || c.name === 'The Star' || c.name === 'The World');
       if (futureCards.length > 0) {
-        reading += "Based on these cards, your future looks promising with positive developments ahead. ";
+        reading += t.basedOnCards + t.futurePromising;
       } else {
-        reading += "Based on these cards, your future path involves important decisions and growth opportunities. ";
+        reading += t.basedOnCards + t.futureDecisions;
       }
     } else {
       // General answer for any question
       const relevantCards = cards.filter(card => {
         const meaning = CARD_MEANINGS[card.name];
         const cardText = card.upright ? meaning.upright : meaning.reversed;
-        return cardText.toLowerCase().includes(question.toLowerCase().split(' ')[0]) ||
-               (question.includes('love') && card.suit === 'cups') ||
-               (question.includes('work') && card.suit === 'pentacles') ||
-               (question.includes('decision') && card.suit === 'swords') ||
-               (question.includes('action') && card.suit === 'wands');
+        return cardText.toLowerCase().includes(questionLower.split(' ')[0]) ||
+               (questionLower.includes('love') && card.suit === 'cups') ||
+               (questionLower.includes('work') && card.suit === 'pentacles') ||
+               (questionLower.includes('decision') && card.suit === 'swords') ||
+               (questionLower.includes('action') && card.suit === 'wands');
       });
       
       if (relevantCards.length > 0) {
-        reading += `Based on these cards, particularly ${relevantCards.map(c => c.name).join(', ')}, the guidance suggests ${relevantCards.some(c => c.upright) ? 'positive developments and clear direction' : 'careful consideration and inner reflection'}. `;
+        const cardNames = relevantCards.map(c => c.name).join(', ');
+        if (relevantCards.some(c => c.upright)) {
+          reading += t.basedOnCards + t.guidancePositive(cardNames);
+        } else {
+          reading += t.basedOnCards + t.guidanceReflection(cardNames);
+        }
       } else {
-        reading += "Based on these cards, the guidance suggests looking at your situation from multiple angles and trusting your inner wisdom. ";
+        reading += t.basedOnCards + t.guidanceGeneral;
       }
     }
   }
