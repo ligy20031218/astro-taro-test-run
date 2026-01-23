@@ -527,7 +527,7 @@ function generateReadingText(
   question: string,
   lang: SupportedLang = 'en'
 ): string {
-  const t = advancedTarotTranslations[lang];
+  const t = advancedTarotTranslations[lang] || advancedTarotTranslations['en'];
   let reading = t.spreadReveals(spread.name);
 
   // Individual card interpretations
@@ -693,14 +693,22 @@ function generateReadingText(
       }
     } else {
       // General answer for any question
+      // Check for common keywords in multiple languages
+      const loveKeywords = ['love', 'amor', 'amour', '爱', 'cinta', '愛', '사랑'];
+      const workKeywords = ['work', 'trabajo', 'travail', '工作', 'kerja', '仕事', '일'];
+      const decisionKeywords = ['decision', 'decisión', 'décision', '决定', 'keputusan', '決定', '결정'];
+      const actionKeywords = ['action', 'acción', 'action', '行动', 'tindakan', '行動', '행동'];
+      
       const relevantCards = cards.filter(card => {
         const meaning = CARD_MEANINGS[card.name];
+        if (!meaning) return false;
         const cardText = card.upright ? meaning.upright : meaning.reversed;
-        return cardText.toLowerCase().includes(questionLower.split(' ')[0]) ||
-               (questionLower.includes('love') && card.suit === 'cups') ||
-               (questionLower.includes('work') && card.suit === 'pentacles') ||
-               (questionLower.includes('decision') && card.suit === 'swords') ||
-               (questionLower.includes('action') && card.suit === 'wands');
+        const firstWord = questionLower.split(' ')[0];
+        return (firstWord && cardText.toLowerCase().includes(firstWord)) ||
+               (loveKeywords.some(kw => questionLower.includes(kw)) && card.suit === 'cups') ||
+               (workKeywords.some(kw => questionLower.includes(kw)) && card.suit === 'pentacles') ||
+               (decisionKeywords.some(kw => questionLower.includes(kw)) && card.suit === 'swords') ||
+               (actionKeywords.some(kw => questionLower.includes(kw)) && card.suit === 'wands');
       });
       
       if (relevantCards.length > 0) {

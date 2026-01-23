@@ -87,32 +87,41 @@ export default function HomePage() {
   async function handleAdvancedTarot() {
     if (!selectedSpread) {
       console.error("No spread selected");
+      alert("Please select a spread type first");
       return;
     }
+    console.log("Starting advanced tarot:", { selectedSpread, userId: userIdRef.current, question: tarotQuestion?.substring(0, 20), lang });
     setTarotLoading(true);
     try {
+      const requestBody = {
+        spreadName: selectedSpread,
+        userId: userIdRef.current,
+        question: tarotQuestion || "",
+        lang
+      };
+      console.log("Sending request:", requestBody);
       const response = await fetch('/api/tarot/advanced', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          spreadName: selectedSpread,
-          userId: userIdRef.current,
-          question: tarotQuestion,
-          lang
-        })
+        body: JSON.stringify(requestBody)
       });
+      console.log("Response status:", response.status);
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorData = await response.json().catch(() => ({ error: "Unknown error" }));
+        throw new Error(`HTTP error! status: ${response.status}, message: ${errorData.error || 'Unknown error'}`);
       }
       const data = await response.json();
+      console.log("Response data:", { success: data.success, hasSession: !!data.session });
       if (data.success) {
         setAdvancedTarot(data.session);
       } else {
-        console.error("API returned error:", data.error);
+        console.error("API returned error:", data.error, data.details);
+        alert(`Failed to draw tarot cards: ${data.error}${data.details ? ` - ${data.details}` : ''}`);
       }
     } catch (error) {
       console.error("Error getting advanced tarot:", error);
-      alert("Failed to draw tarot cards. Please try again.");
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      alert(`Failed to draw tarot cards: ${errorMessage}`);
     } finally {
       setTarotLoading(false);
     }
