@@ -500,6 +500,9 @@ export function drawTarotCards(
   
   const cards = spread.positions.map((position, index) => {
     const card = shuffledDeck[index];
+    if (!card) {
+      throw new Error(`Not enough cards in deck for spread ${spreadName}. Need ${spread.positions.length} cards but only have ${shuffledDeck.length}`);
+    }
     const isUpright = random() > 0.3; // 70% chance of upright
     
     return {
@@ -509,7 +512,13 @@ export function drawTarotCards(
     };
   });
 
-  const readingText = generateReadingText(cards, spread, question, lang);
+  let readingText: string;
+  try {
+    readingText = generateReadingText(cards, spread, question, lang);
+  } catch (error) {
+    console.error("Error generating reading text:", error);
+    throw new Error(`Failed to generate reading text: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
 
   return {
     seed,
@@ -533,10 +542,19 @@ function generateReadingText(
   // Individual card interpretations
   cards.forEach((card, index) => {
     const position = spread.positions[index];
-    const cardMeaning = getTarotCardMeaning(card.name, !card.upright, lang);
-    
-    reading += `**${position}**: ${card.name} ${card.upright ? t.upright : t.reversed}\n`;
-    reading += `${cardMeaning}\n\n`;
+    if (!position) {
+      console.warn(`No position found for card at index ${index}`);
+      return;
+    }
+    try {
+      const cardMeaning = getTarotCardMeaning(card.name, !card.upright, lang);
+      reading += `**${position}**: ${card.name} ${card.upright ? t.upright : t.reversed}\n`;
+      reading += `${cardMeaning}\n\n`;
+    } catch (error) {
+      console.error(`Error processing card ${card.name}:`, error);
+      reading += `**${position}**: ${card.name} ${card.upright ? t.upright : t.reversed}\n`;
+      reading += `Error loading meaning\n\n`;
+    }
   });
 
   // Direct, straightforward analysis
@@ -556,80 +574,98 @@ function generateReadingText(
   
   // Generate direct, specific insights
   if (spread.name === 'relationship') {
-    const you = cards[0];
-    const them = cards[1];
-    const dynamic = cards[2];
-    const communication = cards[3];
-    // const emotional = cards[4];
-    const challenges = cards[5];
-    const advice = cards[6];
-    
-    // Direct relationship analysis
-    if (you.name === 'The Lovers' && them.name === 'The Lovers') {
-      reading += t.basedOnCards + t.relationshipCommitted;
-    } else if (you.suit === 'cups' && them.suit === 'cups') {
-      reading += t.basedOnCards + t.relationshipEmotional;
-    } else if (challenges.name === 'The Devil') {
-      reading += t.basedOnCards + t.relationshipUnhealthy;
-    } else if (advice.name === 'The Magician') {
-      reading += t.basedOnCards + t.relationshipPower;
+    if (cards.length < 7) {
+      reading += t.basedOnCards + "Insufficient cards for relationship spread analysis. ";
     } else {
-      // General relationship analysis
-      reading += t.basedOnCards + t.relationshipGeneral(you.name, them.name, dynamic.name);
+      const you = cards[0];
+      const them = cards[1];
+      const dynamic = cards[2];
+      const communication = cards[3];
+      // const emotional = cards[4];
+      const challenges = cards[5];
+      const advice = cards[6];
+      
+      // Direct relationship analysis
+      if (you?.name === 'The Lovers' && them?.name === 'The Lovers') {
+        reading += t.basedOnCards + t.relationshipCommitted;
+      } else if (you?.suit === 'cups' && them?.suit === 'cups') {
+        reading += t.basedOnCards + t.relationshipEmotional;
+      } else if (challenges?.name === 'The Devil') {
+        reading += t.basedOnCards + t.relationshipUnhealthy;
+      } else if (advice?.name === 'The Magician') {
+        reading += t.basedOnCards + t.relationshipPower;
+      } else if (you && them && dynamic) {
+        // General relationship analysis
+        reading += t.basedOnCards + t.relationshipGeneral(you.name, them.name, dynamic.name);
+      }
+      
+      // Direct compatibility assessment
+      if (you && them) {
+        if (you.suit === them.suit) {
+          reading += t.energyMatch;
+        } else if ((you.suit === 'cups' && them.suit === 'wands') || (you.suit === 'wands' && them.suit === 'cups')) {
+          reading += t.energyComplementary;
+        } else {
+          reading += t.energyDifferent;
+        }
+      }
+      
+      // Direct communication analysis
+      if (communication) {
+        if (communication.name === 'Ace of Cups') {
+          reading += t.communicationOpen;
+        } else if (communication.name === 'Seven of Swords') {
+          reading += t.communicationDishonest;
+        } else {
+          reading += t.communicationGeneral(communication.name, communication.upright);
+        }
+      }
     }
-    
-    // Direct compatibility assessment
-    if (you.suit === them.suit) {
-      reading += t.energyMatch;
-    } else if ((you.suit === 'cups' && them.suit === 'wands') || (you.suit === 'wands' && them.suit === 'cups')) {
-      reading += t.energyComplementary;
-    } else {
-      reading += t.energyDifferent;
-    }
-    
-    // Direct communication analysis
-    if (communication.name === 'Ace of Cups') {
-      reading += t.communicationOpen;
-    } else if (communication.name === 'Seven of Swords') {
-      reading += t.communicationDishonest;
-    } else {
-      reading += t.communicationGeneral(communication.name, communication.upright);
-    }
-    
   } else if (spread.name === '3-card') {
-    const past = cards[0];
-    const present = cards[1];
-    const future = cards[2];
-    
-    // Direct timeline analysis
-    if (past.arcana === 'major' && present.arcana === 'major' && future.arcana === 'major') {
-      reading += t.basedOnCards + t.majorTransformation;
-    } else if (future.name === 'The Sun') {
-      reading += t.basedOnCards + t.futureBright;
-    } else if (future.name === 'The Tower') {
-      reading += t.basedOnCards + t.futureChange;
-    } else if (future.suit === 'pentacles') {
-      reading += t.basedOnCards + t.materialSuccess;
+    if (cards.length < 3) {
+      reading += t.basedOnCards + "Insufficient cards for 3-card spread analysis. ";
     } else {
-      // General timeline analysis
-      reading += t.journeyProgression(past.name, present.name, future.name);
+      const past = cards[0];
+      const present = cards[1];
+      const future = cards[2];
+    
+      // Direct timeline analysis
+      if (past && present && future) {
+        if (past.arcana === 'major' && present.arcana === 'major' && future.arcana === 'major') {
+          reading += t.basedOnCards + t.majorTransformation;
+        } else if (future.name === 'The Sun') {
+          reading += t.basedOnCards + t.futureBright;
+        } else if (future.name === 'The Tower') {
+          reading += t.basedOnCards + t.futureChange;
+        } else if (future.suit === 'pentacles') {
+          reading += t.basedOnCards + t.materialSuccess;
+        } else {
+          // General timeline analysis
+          reading += t.journeyProgression(past.name, present.name, future.name);
+        }
+      }
     }
-    
   } else if (spread.name === 'celtic') {
-    const currentSituation = cards[0];
-    const challenge = cards[1];
-    const outcome = cards[4];
-    
-    // Direct situation analysis
-    if (currentSituation.name === 'The World' && outcome.name === 'The World') {
-      reading += t.basedOnCards + t.celticCompletion;
-    } else if (challenge.name === 'The Devil') {
-      reading += t.basedOnCards + t.celticChallenge;
-    } else if (outcome.name === 'The Star') {
-      reading += t.basedOnCards + t.celticOutcome;
+    if (cards.length < 5) {
+      reading += t.basedOnCards + "Insufficient cards for Celtic spread analysis. ";
     } else {
-      // General Celtic analysis
-      reading += t.celticGeneral(currentSituation.name, challenge.name, outcome.name);
+      const currentSituation = cards[0];
+      const challenge = cards[1];
+      const outcome = cards[4];
+    
+      // Direct situation analysis
+      if (currentSituation && challenge && outcome) {
+        if (currentSituation.name === 'The World' && outcome.name === 'The World') {
+          reading += t.basedOnCards + t.celticCompletion;
+        } else if (challenge.name === 'The Devil') {
+          reading += t.basedOnCards + t.celticChallenge;
+        } else if (outcome.name === 'The Star') {
+          reading += t.basedOnCards + t.celticOutcome;
+        } else {
+          // General Celtic analysis
+          reading += t.celticGeneral(currentSituation.name, challenge.name, outcome.name);
+        }
+      }
     }
   } else {
     // General analysis for other spreads

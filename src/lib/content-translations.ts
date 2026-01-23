@@ -1,4 +1,6 @@
 import type { SupportedLang } from './i18n';
+import { CARD_MEANINGS } from './advanced-tarot';
+import { translateText } from './i18n';
 import type { ZodiacSign } from './zodiac';
 
 type Horizon = "daily" | "monthly" | "yearly";
@@ -631,8 +633,24 @@ export function getHoroscopeTranslation(sign: ZodiacSign, horizon: Horizon, lang
 
 // Helper function to get tarot card meaning translation
 export function getTarotCardMeaning(cardName: string, isReversed: boolean, lang: SupportedLang): string {
+  // First try to get from translations (Major Arcana only)
   const translations = tarotCardTranslations[lang]?.[cardName] || tarotCardTranslations.en[cardName];
-  return isReversed ? translations.reversed : translations.upright;
+  if (translations) {
+    return isReversed ? translations.reversed : translations.upright;
+  }
+  
+  // If not in translations (e.g., Minor Arcana), fall back to CARD_MEANINGS
+  const cardMeanings = CARD_MEANINGS[cardName];
+  if (cardMeanings) {
+    const meaning = isReversed ? cardMeanings.reversed : cardMeanings.upright;
+    // For Minor Arcana, use translateText (which adds [lang] prefix for now)
+    // Full translations for all 78 cards can be added later
+    return translateText(meaning, lang);
+  }
+  
+  // Final fallback
+  console.warn(`No meaning found for card: ${cardName}, lang: ${lang}`);
+  return isReversed ? "Unknown reversed meaning" : "Unknown upright meaning";
 }
 
 // Helper function to get tarot summary translation
